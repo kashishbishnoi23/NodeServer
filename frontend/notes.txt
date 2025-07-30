@@ -1,0 +1,24 @@
+go to cmd -> go to current folder (NodeServer) -> npm init -> initialises the package.json -> basic details and guesses other things by default
+
+install express
+
+create index.js -> entry point for the file -> jaha sara set up hoga -> creating server -> server listens etc
+
+
+create an EC2 instance -> ubuntu instance => create key-pair -> connect -> open terminal
+
+sudo apt update
+
+sudo apt install nodejs
+
+node -v  --> shows the older version -> we want the lts version so install nvm -> we can switch our versions using nvm
+
+exit 
+
+connect again using the ssh ...key command
+
+nvm -v  --> shows the version of nvm
+
+nvm install --lts   -> install the lts version
+
+node -v  -> new version of node
