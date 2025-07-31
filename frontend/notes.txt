@@ -4,21 +4,88 @@ install express
 
 create index.js -> entry point for the file -> jaha sara set up hoga -> creating server -> server listens etc
 
+check localhost:port -> hmari machine me is port number pe node service run kar rahi hai
+
+deploying our Node server on Cloud / EC2 instance:
+
+why do we create key-pair ??? -> taki ek authenticated insaan hi hamari virtual machine ko access kr paye -> how is it achived , key-pair me 2 cheeze aati hain -> public key + private key -> public key to EC2 instance ko inject ki jati hai aur private key vo hoti hai jo ham download karte hain (stored securely in our computer), when we try to connect to our instance using SSH -> the private key on our machine is matched to the public key on EC2 instance. If the key pair matches, you're authenticated and allowed to access the instance. If not, connection is denied -> so isme kisi password wagarh ki jarurat nahi hai -> directly kaam hota hai
+
+har instance k liye alag key-pair hota hai -> cuz obviously, har instance se connect krne k liye we need a new security key 
+
+You can only download private key once when creating your pair
+Never share your .pem file , is file k bina connect krna becomes quite difficult
+
 
 create an EC2 instance -> ubuntu instance => create key-pair -> connect -> open terminal
 
-sudo apt update
+Network settings -> kis tareeke ka traffic aap apne EC2 instance pe allow karna chahte ho ? -> allow SSH traffic -> cuz isi se to ham connect kr payenge, allow HTTP and HTTPs traffic -> cuz jab server deploy hoga uspe ham HTTP/HTTPS requests bhejenge so allow all types of traffic. 
 
-sudo apt install nodejs
+Launch the instance and connect to your terminal
 
-node -v  --> shows the older version -> we want the lts version so install nvm -> we can switch our versions using nvm
+ab github pe repo banao -> apna project push kro -> node modules ko git ignore me daalo -> don't push it -> we don't push node modules, we only push package.json and package-lock.json -> package-lock.json has all dependencies and sub-dependencies that are in the project , version sahet taki baad me versions wale conflict na aayein -> git pe push ham islye kr rahe hain taki apna project waha se clone krke apni virtual machine me store krde -> deploy krne k liye -> clone krne ke liye use the HTTPS link -> cuz it is easier to use -> iska matlab hota hai ki we're using HTTPs protocol to connect to the Github servers 
 
-exit 
+git clone <LINK> -> we get our project on the ubuntu machine -> ls krne pe we get our project folder
 
-connect again using the ssh ...key command
+what might be the problems if we don't push node modules to git -> agar samne wala banda npm i kre -> and it installs different versions so -> conflicts aa skte hain -> so sari dependencies and sub dependencies package-lock.json se uthata hai -> it has all the required details -> so don't commit node modules but always commit package.json and package-lock.json
+
+
+ab hamari machine me project to hai but use chalaane ke liye hame dependencies install krni padegi -> our machine doesn't know what is node yet for example
+
+commands:
+sudo apt update -> iska matlab hai ki -> sudo is for superuser , apt -> advanced package tool (used for managing software on Debian-based systems like ubuntu) -> basically jo packages hai unke latest versions ki list chahiye -> unke versions ko update krlo from internet
+
+sudo apt install nodejs  -> install node.js
+
+node -v  --> shows the older version -> we want the lts version  (long term support versions -> jinme lambe time tak kuch khas changes nahi aate hain) so install nvm -> we can switch our versions using nvm
+
+what is nvm ?? Node version manager -> ho skta hai different different projects me node k alag alag versions ka use ho to baar baar node ko install uninstall krne ki jagah we use nvm -> jisse ham directly versions me switch kr skte hain
+
+steps -> curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash  -> this installs nvm
+
+exit  -> again connect to EC2 -> do nvm -v -> get the version of nvm 
+
+
 
 nvm -v  --> shows the version of nvm
 
-nvm install --lts   -> install the lts version
+nvm install --lts   -> install the lts version of node 
 
-node -v  -> new version of node
+node -v  -> new version of node (latest version)
+
+do npm install -> it installs all the dependencies required to run the project
+
+node index.js &  -> Server is running on this port (eg, 3000), & lagane se terminal hamari process ko terminate nahi krta
+
+ab hamara project jo hai vo virtual machine pe deployed hai so uska url ab localhost:3000 nahi hai -> ab isme cloud ke server ka ip address ayega -> so uske liye hame ek dns provide hota hai -> Connect -> SSH Client me public dns se -> this is the dns that will be converted to the ip address of the server 
+
+jake is dns ko paste kro browser me -> abhi ye nahi chalega -> cuz hmne security group me port 3000 add nahi kiya hai 
+
+Security groups ye batate hain ki konse ports open to use hain hamari EC2 instance pe -> jin ports pe ham apna project deploy kr skte hain -> so jis port number pe aap apna project deploy krna chahte ho vo port number added hona chahiye
+
+iske liye go to your instance -> Security -> security groups -> edit inbound rules -> add custom port -> tcp for example 3000 , save the rules , now connect again using dns
+isme dns : 3000 krna padega , cuz we're using a custom port number
+
+what if we want to deploy our project on port 80 of our server
+
+
+
+
+change the port number to 80 (using vim index.js) => paste the dns to browser -> won't work -> 
+make sure http port 80 is added to the security group of your instance 
+
+now to use 80 port we need root privileges , cuz ye port privileged hota hai -> so ham sudo use krke iski file run krte hain (index.js) -> pehle to install node for sudo
+
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -   -> installs globally (root accessible)
+ sudo apt install -y nodejs
+ sudo node index.js &
+
+ab jake dns ko browser me paste kro -> without :80 (cuz by default 80 port pe hi request jati hai so we don't need to define it explicitly)
+
+ab hamne apne project ko port 80 pe deploy kr diya hai (which is the best practice) cuz websites port 80 pe deployed hoti hain , cuz it is the default port, no need to include it in the url
+
+ab jaake EC2 instance ka public IP bhi browser me paste kro -> aapka project chal jayega -> cuz dns bhi ip address me hi convert hota hai at the end
+
+
+
+
+
